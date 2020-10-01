@@ -1,5 +1,9 @@
 # Roblox-Client-Server-Time-Sync-Module
 
+**VERSION 2.0:**
+Small tweak with significant ramifications. This version 2.0 monitors what I call "replication pressure", which is basically my way of tracking how much data is being replicated to the client. By monitoring this value, I prevent the sync offset from being updated during times of high replication load, ensuring that the system remains accurate in unideal conditions. This will not improve performance in normal conditions but it will massively improve performance in high stress situations.
+
+**What this module accomplishes:**
 Syncs time between multiple clients and the server with accuracy of within 1 millisecond. Exploits patterns in Roblox networking, mainly how Roblox packages network requests into larger chunks every few frames, to determine a far greater accuracy for time syncing than what would otherwise be possible. Read more here: https://devforum.roblox.com/t/high-precision-clock-syncing-tech-between-clients-and-server-with-accuracy-of-1ms/769346
 
 You can try out this module in a sample demonstration place here: https://www.roblox.com/games/5673596036/Client-Server-Clock-Sync-Tool?refPageId=52f40730-a656-4c57-b29f-ab4f521791de (note that it is uncopylocked, so you can see exactly how this module is meant to be used).
