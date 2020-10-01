@@ -21,7 +21,7 @@
 			a. If there are problems with this system, feel free to message me on Roblox (Fluffmiceter) or Twitter (@Fluffmiceter)
 --]]
 local module = {}
- 
+
 -----------------------------------------------------------------------------------------------------
 --SERVICES
 -----------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ function module:GetTime(overwriteTick) --Not recommended to use this on the clie
 	end
 end
 
-function module:Update() --Hook this to runService.Heartbeat or runService.Stepped for proper operation.
+function module:Update(step) --Hook this to runService.Heartbeat or runService.Stepped for proper operation.
 	local newUpdate = tick()
 	self.AverageFrameTime = self.AverageFrameTime * 0.9 + (newUpdate - self.LastUpdate) * 0.1
 	self.LastUpdate = newUpdate
@@ -97,6 +97,9 @@ function module:Update() --Hook this to runService.Heartbeat or runService.Stepp
 				end
 			end))
 		end
+	else
+		self.ReplicationPressure = self.ReplicationPressure * 0.8 + (self.Tally / step) * 0.2
+		self.Tally = 0
 	end
 end
 
@@ -149,10 +152,13 @@ if isClient then
 				end
 				
 				average /= #self.Cache
-				if not self.ServerTimeOffset then
-					self.ServerTimeOffset = average
-				else
-					self.ServerTimeOffset = self.ServerTimeOffset * 0.98 + average * 0.02
+				
+				if self.ReplicationPressure < self.Threshold then
+					if not self.ServerTimeOffset then
+						self.ServerTimeOffset = average
+					else
+						self.ServerTimeOffset = self.ServerTimeOffset * 0.98 + average * 0.02
+					end
 				end
 			end
 			
@@ -180,8 +186,8 @@ function module:Initialize()
 	self.AverageFrameTime = 0.0167
 	self.LastUpdate = tick()
 	
-	runService.Heartbeat:connect(function()
-		self:Update()
+	runService.Heartbeat:connect(function(step)
+		self:Update(step)
 	end)
 	
 	if isClient then
@@ -193,9 +199,17 @@ function module:Initialize()
 		self.Grouping = 0
 		self.TotalShift = 0
 		
+		self.Tally = 0
+		self.ReplicationPressure = 0
+		self.Threshold = 100
+		
 		function clockSyncSignal.OnClientInvoke(...)
 			self:InvokeSignal(...)
 		end
+		
+		game.DescendantAdded:connect(function()
+			self.Tally += 1
+		end)
 	else
 		self.AverageDelays = {}
 		self.PlayerCaches = {}
