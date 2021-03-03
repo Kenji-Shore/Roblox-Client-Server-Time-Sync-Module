@@ -103,7 +103,7 @@ function module:Heartbeat(step) --Hook this to runService.Heartbeat for proper o
 	else
 		for _, player in ipairs(players:GetPlayers()) do
 			if self.TimeDelays[player] then
-				clockSyncSignal:FireAllClients(tick(), self.TimeDelays[player])
+				clockSyncSignal:FireClient(player, tick(), self.TimeDelays[player])
 			end
 		end
 	end
